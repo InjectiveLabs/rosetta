@@ -101,7 +101,7 @@ func (c *Client) Bootstrap() error {
 		return crgerrs.WrapError(crgerrs.ErrOnlineClient, fmt.Sprintf("dialing grpc endpoint %s", err.Error()))
 	}
 
-	tmRPC, err := http.New(c.config.TendermintRPC, tmWebsocketPath)
+	tmRPC, err := http.New(c.config.TendermintRPC)
 	if err != nil {
 		return crgerrs.WrapError(crgerrs.ErrOnlineClient, fmt.Sprintf("getting rpc path %s", err.Error()))
 	}
@@ -488,7 +488,7 @@ func (c *Client) blockTxs(ctx context.Context, height *int64) (crgtypes.BlockTra
 		return crgtypes.BlockTransactionsResponse{}, crgerrs.WrapError(crgerrs.ErrOnlineClient, fmt.Sprintf("getting rpc block results %s", err.Error()))
 	}
 
-	if len(blockResults.TxsResults) != len(blockInfo.Block.Txs) {
+	if len(blockResults.TxResults) != len(blockInfo.Block.Txs) {
 		return crgtypes.BlockTransactionsResponse{}, crgerrs.WrapError(crgerrs.ErrOnlineClient, "block results transactions do now match block transactions")
 	}
 	// process begin and end block txs
@@ -503,7 +503,7 @@ func (c *Client) blockTxs(ctx context.Context, height *int64) (crgtypes.BlockTra
 	deliverTx := make([]*rosettatypes.Transaction, len(blockInfo.Block.Txs))
 	// process normal txs
 	for i, tx := range blockInfo.Block.Txs {
-		rosTx, err := c.converter.ToRosetta().Tx(tx, blockResults.TxsResults[i])
+		rosTx, err := c.converter.ToRosetta().Tx(tx, blockResults.TxResults[i])
 		if err != nil {
 			return crgtypes.BlockTransactionsResponse{}, crgerrs.WrapError(crgerrs.ErrOnlineClient, fmt.Sprintf("getting rosetta tx %s", err.Error()))
 		}
